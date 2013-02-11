@@ -7,6 +7,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	 * @param {String} config.dateFormat
 	 * @param {String} config.selectedDate
 	 * @param {String} config.template
+	 * @param {Function} config.onSelect
 	 */
 	smpl.ui.Calendar = function(config) {
 		this.config = config;
@@ -177,6 +178,17 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	
 	smpl.ui.Calendar.prototype.show = function() {
 		this.config.template.parse(this.getData(), this).load(this.config.container);
+	};
+	
+	smpl.ui.Calendar.prototype.select = function(date) {
+		date = this.getDate(date);
+		if (this.isValid(date)) {
+			this.currentDate = date;
+			this.adjustCurrentMonth();
+			this.config.onSelect(date.clone().toDate());
+			return true;
+		}
+		return false;
 	};
 	
 	smpl.ui.Calendar.prototype.keyDown = function(e) {

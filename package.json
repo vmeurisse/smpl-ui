@@ -9,7 +9,7 @@
 		"url": "https://github.com/vmeurisse/smpl-ui/issues"
 	},
 	"dependencies": {
-		"smpl": "0.0.1beta",
+		"smpl": "0.0.1",
 		"jake": "0.5.x",
 		"shelljs": "0.1.x",
 		"moment": "1.7.x",

@@ -7,11 +7,11 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		var defaultConfig = {
 			dateFormat: 'DD/MM/YYYY',
 			showOnFocus: false,
-			datepicker: this
+			onSelect: this.dateSelect.bind(this) //Callback for the calendar component
 		};
 		smpl.data.extendObject(this.config, defaultConfig);
 		
-		this.calendar = new smpl.ui.Calendar(config);
+		this.calendar = new smpl.ui.Calendar(this.config);
 		this.dropDown = new smpl.ui.Dropdown({
 			anchor: this.config.input,
 			onKeyDown: this.calendar.keyDown.bind(this.calendar),
@@ -39,6 +39,10 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		
 		this.calendar.destroy();
 		this.dropDown.destroy();
+	};
+	
+	smpl.ui.Datepicker.prototype.dateSelect = function(date) {
+		this.onClose();
 	};
 	
 	smpl.ui.Datepicker.prototype.show = function(e) {
@@ -71,6 +75,7 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 	};
 	
 	smpl.ui.Datepicker.prototype.onClose = function(cancel) {
+		this.dropDown.hide();
 		this.noFocus = true;
 		this.config.input.focus();
 		this.noFocus = false;

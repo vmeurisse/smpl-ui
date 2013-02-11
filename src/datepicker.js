@@ -49,23 +49,15 @@ define(['./datepicker.html', 'smpl/smpl.dom', 'moment'], function(tpl) {
 		return classes.join(' ');
 	};
 	
-	tpl.nextMonth = function() {
-		this.datepicker.nextMonth();
-	};
-	
-	tpl.previousMonth = function() {
-		this.datepicker.previousMonth();
-	};
-	
 	tpl.selectDate = function(e) {
 		smpl.dom.stopEvent(e);
 		var date = e.target.getAttribute('data-date');
 		if (date) {
-			if (date === 'previousMonth') tpl.previousMonth();
-			else if (date === 'nextMonth') tpl.nextMonth();
+			if (date === 'previousMonth') this.datepicker.previousMonth();
+			else if (date === 'nextMonth') this.datepicker.nextMonth();
 			else {
 				date = date.split(',');
-				this.datepicker.select(this.months[+date[0]][+date[1]][+date[2]].date);
+				this.datepicker.select(this.data.months[+date[0]][+date[1]][+date[2]].date);
 			}
 		}
 	};
