@@ -1,0 +1,23 @@
+<div class="smpl-ui-calendar" onclick="{$me}.selectDate(event);">
+	<!-- BEGIN: month -->
+		<table >
+			<tr class="header">
+				<th class="{$pmClass}" data-date="{$pmDate}"></th>
+				<th colspan="5">{$monthName}</th>
+				<th class="{$nmClass}" data-date="{$nmDate}"></th>
+			</tr>
+			<tr class="weekDays">
+				<!-- BEGIN: wd -->
+					<th>{$wd}</th>
+				<!-- END: wd -->
+			</tr>
+			<!-- BEGIN: week -->
+				<tr>
+					<!-- BEGIN: day -->
+						<td class="{$classes}" data-date="{$date}">{$day}</td>
+					<!-- END: day -->
+				</tr>
+			<!-- END: week -->
+		</table>
+	<!-- END: month -->
+</div>

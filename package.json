@@ -1,0 +1,35 @@
+{
+	"name": "smpl-ui",
+	"version": "0.0.1alpha1",
+	"author": "Vincent Meurisse <dev@meurisse.org>",
+	"description": "A simple javascrit library used to build complex web applications",
+	"keywords": ["simple",  "template", "ajax", "library", "data", "toolkit", "amd", "light", "lightweight", "mvc"],
+	"homepage": "https://github.com/vmeurisse/smpl-ui",
+	"bugs": {
+		"url": "https://github.com/vmeurisse/smpl-ui/issues"
+	},
+	"dependencies": {
+		"smpl": "0.0.1beta",
+		"jake": "0.5.x",
+		"shelljs": "0.1.x",
+		"moment": "1.7.x",
+		"resolve": "0.2.x",
+		"requirejs": "https://github.com/vmeurisse/r.js/archive/master.tar.gz"
+	},
+	"devDependencies": {
+		"smpl-build-test": "~0.0.2"
+	},
+	"scripts": {
+		"install": "jake"
+	},
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/vmeurisse/smpl-ui.git"
+	},
+	"files": [
+		"package.json",
+		"Jakefile.js",
+		"README.md",
+		"src"
+	]
+}

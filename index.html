@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<style>
+		.margin {
+			padding: 600px 400px;
+			border: 1px solid red;
+		}
+		
+		.smpl-ui-Dropdown {
+			border: 1px solid #C13A02;
+			background-color: white;
+			border-radius: 5px;
+			padding: 10px;
+		}
+
+		label {
+			display: block;
+			width: 300px;
+		}
+	</style>
+</head>
+<body>
+	<div class="margin">
+		<label>bDate: <input/></label>
+		<label>eDate: <input/><button onclick="eDate.toggle();smpl.dom.stopEvent(event)">cal</button></label>
+	</div>
+	<script src="node_modules/requirejs/require.js"></script>
+	<script src="smpl.js"></script>
+	<script>
+		require(['./smpl', './src/smpl.ui.Datepicker', './src/datepicker', 'smpl/smpl.dom'], function (x, smpl, tpl) {
+			window.tplRepo = {};
+			smpl.tpl.enableGlobal('tplRepo', tplRepo);
+
+			window.bDate = new smpl.ui.Datepicker({
+				input: document.querySelector('input'),
+				template: tpl,
+				numberOfMonths: 1,
+				minDate: new Date(),
+				maxDate: new Date(new Date().getTime()+3600000*24*350),
+				firstDayOfWeek: 0,
+				showOnFocus: true
+			});
+			window.eDate = new smpl.ui.Datepicker({
+				input: document.querySelectorAll('input')[1],
+				template: tpl,
+				numberOfMonths: 2,
+				minDate: new Date(new Date().getTime()+3600000*24),
+				maxDate: new Date(new Date().getTime()+3600000*24*351),
+				firstDayOfWeek: 1
+			});
+			window.smpl = smpl;
+		});
+	</script>
+</body>
+</html>
