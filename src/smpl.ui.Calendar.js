@@ -41,6 +41,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	smpl.ui.Calendar.prototype.getCurrentDate = function() {
 		return this.currentDate.clone().toDate();
 	};
+	
 	smpl.ui.Calendar.prototype.getMonth = function(date) {
 		date = date.clone();
 		
@@ -104,7 +105,52 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		return true;
 	};
 	
-	smpl.ui.Calendar.prototype.multiShift = function(diff) {
+	smpl.ui.Calendar.prototype.adjustDate = function(date, limitToMonth) {
+		if (this.isValid(date)) return date;
+		
+		//the function multiShift operate on currentDate. Save it before
+		var currentDate = this.currentDate;
+		
+		this.currentDate = date;
+		var up = this.multiShift(+1, true);
+		var upDate = this.currentDate;
+		
+		this.currentDate = date;
+		var down = this.multiShift(-1, true);
+		var downDate = this.currentDate;
+		
+		this.currentDate = currentDate;
+		
+		if (up === 0 && down === 0) return null;
+		
+		var prefered, chalenger;
+		if (up === 0 || down === 0) {
+			prefered = (up === 0) ? downDate : upDate;
+		} else {
+			prefered = (up <= down) ? upDate : downDate;
+			chalenger = (up <= down) ? downDate : upDate;
+		}
+		
+		if (!limitToMonth || this.sameMonth(date, prefered)) return prefered;
+		else if (chalenger && this.sameMonth(date, chalenger)) return chalenger;
+		return null;
+	};
+	
+	smpl.ui.Calendar.prototype.sameMonth = function(date1, date2) {
+		return date1.month() === date2.month() && date1.year() === date2.year();
+	};
+	
+	smpl.ui.Calendar.prototype.shiftMonth = function(direction) {
+		var candidate = this.currentDate.clone().add('months', direction);
+		candidate = this.adjustDate(candidate, true);
+		if (candidate) {
+			this.currentDate = candidate;
+			this.adjustCurrentMonth();
+			this.show();
+		}
+	};
+	
+	smpl.ui.Calendar.prototype.multiShift = function(diff, noDisplay) {
 		var shift = 0;
 		var candidate = this.currentDate.clone().add('days', diff);
 		
@@ -117,8 +163,10 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		if (this.isValid(candidate)) {
 			shift = candidate.diff(this.currentDate, 'days') / diff;
 			this.currentDate = candidate;
-			this.adjustCurrentMonth();
-			this.show();
+			if (!noDisplay) {
+				this.adjustCurrentMonth();
+				this.show();
+			}
 		}
 		return shift;
 	};
@@ -191,19 +239,46 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		return false;
 	};
 	
+	smpl.ui.Calendar.prototype.jumpToLimit = function(limit) {
+		var shift = 1;
+		if (limit === 'min') {
+			limit = this.minDate;
+		} else {
+			limit = this.maxDate;
+			shift = -1;
+		}
+		
+		if (limit) {
+			var oldDate = this.currentDate;
+			this.currentDate = limit.clone();
+			if (this.isValid(this.currentDate)) {
+				this.adjustCurrentMonth();
+				this.show();
+			} else {
+				shift = this.multiShift(shift);
+				if (shift === 0) {
+					// multiShift didn't found any valid date. revert to original value
+					this.currentDate = oldDate;
+				}
+			}
+		}
+	};
+	
 	smpl.ui.Calendar.prototype.keyDown = function(e) {
 		if (e.keyCode >= 33 && e.keyCode <= 40) {
 			smpl.dom.stopEvent(e);
 			switch (e.keyCode) {
 				case 33: //PageUp
-					this.previousMonth();
+					this.shiftMonth(-1);
 					break;
 				case 34: //PageDown
-					this.nextMonth();
+					this.shiftMonth(+1);
 					break;
 				case 35: //End
+					this.jumpToLimit('max');
 					break;
 				case 36: //Home
+					this.jumpToLimit('min');
 					break;
 				case 37: //Left
 					this.multiShift(-1);

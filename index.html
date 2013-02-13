@@ -49,7 +49,15 @@
 				minDate: new Date(new Date().getTime()+3600000*24),
 				maxDate: new Date(new Date().getTime()+3600000*24*351),
 				firstDayOfWeek: 1,
-				selectedDate: new Date(new Date().getTime()+3600000*24)
+				selectedDate: new Date(new Date().getTime()+3600000*24),
+				isValid: function(date) {
+					var y = date.getFullYear();
+					var m = date.getMonth() + 1;
+					var d = date.getDate();
+					if (y === 2013 && m === 3 && (d === 14 || d === 15)) return false;
+					if (y === 2013 && m === 5 && (d === 14 || d === 15 || d === 16)) return false;
+					return true;
+				}
 			});
 			window.smpl = smpl;
 		});
