@@ -43,6 +43,8 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 	smpl.ui.Dropdown.prototype.setPosition = function(anchor) {
 		var anchor = this.config.anchor.getBoundingClientRect();
 		
+		var space = 1; //space between the input and the dropDown
+		
 		var dom = this.getDom();
 		
 		var size = {
@@ -67,7 +69,7 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 		
 		var position = {
 			left: anchor.left + scroll.left,
-			top: anchor.bottom + scroll.top
+			top: anchor.bottom + scroll.top + space
 		};
 		if (position.left + size.width > scroll.left + viewport.width) {
 			position.left = scroll.left + viewport.width - size.width;
@@ -77,8 +79,8 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 		}
 		
 		if (position.top + size.height > scroll.top + viewport.height &&
-		    anchor.top - size.height > 0) {
-			position.top = anchor.top - size.height + scroll.top;
+		    anchor.top - size.height - space > 0) {
+			position.top = anchor.top - size.height - space + scroll.top;
 		} else if (position.top < scroll.top) {
 			position.top = scroll.top;
 		}
