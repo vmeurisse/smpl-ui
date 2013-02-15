@@ -33,7 +33,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	
 	smpl.ui.Calendar.prototype.getDate = function(date) {
 		if (typeof date !== 'string') {
-			return = moment([date.getFullYear(), date.getMonth(), date.getDate(), 12, 0]);
+			return moment([date.getFullYear(), date.getMonth(), date.getDate(), 12, 0]);
 		}
 		return moment([+date[0], +date[1] - 1, +date[2], 12, 0]);
 	};
@@ -233,7 +233,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		if (this.isValid(date)) {
 			this.currentDate = date;
 			this.adjustCurrentMonth();
-			this.config.onSelect(date.clone().toDate());
+			this.config.onSelect(this.getCurrentDate());
 			return true;
 		}
 		return false;
