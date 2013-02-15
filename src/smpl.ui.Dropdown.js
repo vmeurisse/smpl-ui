@@ -28,8 +28,6 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 	smpl.ui.Dropdown.prototype.show = function(anchor) {
 		this.setPosition();
 		
-		this.dom.style.display = 'block';
-		
 		if (!this.visible) {
 			window.addEventListener('scroll', this.reposition, true);
 			window.addEventListener('resize', this.reposition, true);
@@ -52,6 +50,12 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 			height: this.config.height
 		};
 		if (!size.width || !size.height) {
+			if (!this.visible) {
+				dom.style.left = dom.style.top = '-9999px';
+				dom.style.visibility = 'hidden';
+				dom.style.display = 'block';
+				this.visible = 'hidden';
+			}
 			var rect = dom.getBoundingClientRect();
 			size.width = size.width || rect.right - rect.left;
 			size.height = size.height || rect.bottom - rect.top;
@@ -87,6 +91,12 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 		
 		dom.style.top = position.top + 'px';
 		dom.style.left = position.left + 'px';
+		if (this.visible === 'hidden') {
+			dom.style.visibility = '';
+			this.visible = false;
+		} else if (!this.visible) {
+			dom.style.display = 'block';
+		}
 	};
 	
 	smpl.ui.Dropdown.prototype.hide = function() {
