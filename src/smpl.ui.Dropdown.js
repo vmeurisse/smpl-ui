@@ -106,7 +106,7 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 				e.preventDefault();
 				e.stopPropagation();
 			}
-			if (this.config.onClose) this.config.onClose(e.keyCode === 27);
+			if (this.config.onClose) this.config.onClose(e.keyCode === 27, false);
 		} else {
 			if (this.config.onKeyDown) this.config.onKeyDown(e);
 		}
@@ -115,7 +115,7 @@ define(['./smpl.ui.core', 'smpl/smpl.dom'], function(smpl) {
 	
 	smpl.ui.Dropdown.prototype.click = function(e) {
 		this.hide();
-		if (this.config.onClose) this.config.onClose(true);
+		if (this.config.onClose) this.config.onClose(true, true);
 	};
 	
 	return smpl;

@@ -74,11 +74,17 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		}
 	};
 	
-	smpl.ui.Datepicker.prototype.onClose = function(cancel) {
+	smpl.ui.Datepicker.prototype.onClose = function(cancel, fromMouse) {
 		this.dropDown.hide();
-		this.noFocus = true;
-		this.config.input.focus();
-		this.noFocus = false;
+		
+		// Do not focus in the following cases:
+		//  - user clicked outside the dropDown
+		//  - user seleced a date with his mouse
+		if (!fromMouse && !(this.config.showOnFocus && cancel === undefined)) {
+			this.noFocus = true;
+			this.config.input.focus();
+			this.noFocus = false;
+		}
 		if (!cancel) {
 			this.config.input.value = moment(this.calendar.getCurrentDate()).format(this.config.dateFormat);
 		}

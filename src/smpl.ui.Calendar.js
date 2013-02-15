@@ -33,13 +33,13 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	
 	smpl.ui.Calendar.prototype.getDate = function(date) {
 		if (typeof date !== 'string') {
-			date = moment(date).format('YYYY-MM-DD');
+			return = moment([date.getFullYear(), date.getMonth(), date.getDate(), 12, 0]);
 		}
-		return moment(date + ' 12:00', 'YYYY-MM-DD HH:mm');
+		return moment([+date[0], +date[1] - 1, +date[2], 12, 0]);
 	};
 	
 	smpl.ui.Calendar.prototype.getCurrentDate = function() {
-		return this.currentDate.clone().toDate();
+		return this.currentDate && this.currentDate.clone().toDate();
 	};
 	
 	smpl.ui.Calendar.prototype.getMonth = function(date) {
