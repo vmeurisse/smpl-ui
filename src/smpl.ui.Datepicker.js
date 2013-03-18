@@ -1,13 +1,17 @@
 define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 	'use strict';
 	
+	/**
+	 * 
+	 */
 	smpl.ui.Datepicker = function(config) {
 		this.config = config;
 		
 		var defaultConfig = {
 			dateFormat: 'DD/MM/YYYY',
 			showOnFocus: false,
-			onSelect: this.dateSelect.bind(this) //Callback for the calendar component
+			onSelect: this.dateSelect.bind(this), //Callback for the calendar component
+			onChange: null
 		};
 		smpl.data.extendObject(this.config, defaultConfig);
 		
@@ -23,7 +27,7 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		if (this.config.showOnFocus) {
 			this.config.input.addEventListener('focus', this.onFocus, true);
 			
-			// prevent the dropDown to be closed imediatelly after open
+			// prevent the dropDown to be closed immediately after open
 			this.config.input.addEventListener('click', smpl.dom.stopEventPropagation, true);
 		}
 		
@@ -41,12 +45,17 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		this.dropDown.destroy();
 	};
 	
+	smpl.ui.Datepicker.prototype.getDate = function() {
+		var date = moment(this.config.input.value, this.config.dateFormat);
+		return (date && date.isValid()) ? date.toDate() : null;
+	};
 	smpl.ui.Datepicker.prototype.dateSelect = function(date) {
 		this.onClose();
 	};
 	
 	smpl.ui.Datepicker.prototype.show = function(e) {
 		this.calendar.setContainer(this.dropDown.getDom());
+		this.calendar.setSelectedDate(this.getDate());
 		this.calendar.show();
 		this.dropDown.show();
 		this.config.input.blur();
@@ -79,16 +88,19 @@ define(['./smpl.ui.Dropdown', './smpl.ui.Calendar', 'moment'], function(smpl) {
 		
 		// Do not focus in the following cases:
 		//  - user clicked outside the dropDown
-		//  - user seleced a date with his mouse
+		//  - user selected a date with his mouse
 		if (!fromMouse && !(this.config.showOnFocus && cancel === undefined)) {
 			this.noFocus = true;
 			this.config.input.focus();
 			this.noFocus = false;
 		}
 		if (!cancel) {
-			this.config.input.value = moment(this.calendar.getCurrentDate()).format(this.config.dateFormat);
+			this.selectDate(this.calendar.getSelectedDate());
 		}
 	};
 	
+	smpl.ui.Datepicker.prototype.selectDate = function(date) {
+		this.config.input.value = moment(date).format(this.config.dateFormat);
+	};
 	return smpl;
 });

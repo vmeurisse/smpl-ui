@@ -1,10 +1,9 @@
-define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom', 'moment'], function(smpl) {
+define(['./smpl.ui.core', 'smpl/smpl.data', 'smpl/smpl.date', 'smpl/smpl.dom'], function(smpl) {
 	'use strict';
 	
 	/**
 	 * @param {Integer} config.firstDayOfWeek First day of week to be displayed. 0: sunday, 1: monday... (default: 1)
 	 * @param {Integer} config.numberOfMonths Number of months to be displayed (default: 1)
-	 * @param {String} config.dateFormat
 	 * @param {String} config.selectedDate
 	 * @param {String} config.template
 	 * @param {Function} config.onSelect
@@ -14,8 +13,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		
 		var defaultConfig = {
 			firstDayOfWeek: 1,
-			numberOfMonths: 1,
-			dateFormat: 'DD/MM/YYYY'
+			numberOfMonths: 1
 		};
 		smpl.data.extendObject(this.config, defaultConfig);
 		this.config.template = this.config.template.getInstance();
@@ -23,7 +21,8 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		this.minDate = this.config.minDate ? this.getDate(this.config.minDate) : null;
 		this.maxDate = this.config.maxDate ? this.getDate(this.config.maxDate) : null;
 		this.today = this.getDate(new Date());
-		this.currentDate = this.config.selectedDate ? this.getDate(this.config.selectedDate) : this.today.clone();
+		this.setSelectedDate(this.config.selectedDate);
+		this.defaultDate = smpl.date.clone(this.currentDate || this.today);
 		this.currentMonth;
 	};
 	
@@ -31,76 +30,96 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		this.config.container = container;
 	};
 	
-	smpl.ui.Calendar.prototype.getDate = function(date) {
-		if (typeof date !== 'string') {
-			return moment([date.getFullYear(), date.getMonth(), date.getDate(), 12, 0]);
-		}
-		return moment([+date[0], +date[1] - 1, +date[2], 12, 0]);
+	/**
+	 * 
+	 */
+	smpl.ui.Calendar.prototype.getSelectedDate= function() {
+		return this.currentDate && smpl.date.clone(this.currentDate);
+	};
+	smpl.ui.Calendar.prototype.setSelectedDate= function(date) {
+		date = date && this.getDate(date);
+		if (date && !this.isValid(date)) date = undefined;
+		this.currentDate = date;
+		this.adjustCurrentMonth();
+		return !!date;
 	};
 	
 	smpl.ui.Calendar.prototype.getCurrentDate = function() {
-		return this.currentDate && this.currentDate.clone().toDate();
+		if (this.currentDate) return this.currentDate;
+		else return this.adjustDate(this.defaultDate);
+	};
+	smpl.ui.Calendar.prototype.getDate = function(date) {
+		if (typeof date !== 'string') {
+			return new Date(date.getFullYear(), date.getMonth(), date.getDate(), 12, 0);
+		}
+		date = date.split('-');
+		return new Date(+date[0], +date[1] - 1, +date[2], 12, 0);
 	};
 	
 	smpl.ui.Calendar.prototype.getMonth = function(date) {
-		date = date.clone();
+		date = smpl.date.clone(date);
 		
-		var month = date.month();
-		var dow = date.day();
+		var month = date.getMonth();
+		var dow = date.getDay();
 		var fdow = this.config.firstDayOfWeek;
-		date.subtract('days', (dow - fdow + 7) % 7);
-		if (dow === fdow && date.daysInMonth() === 28) {
+		smpl.date.shift(date, (fdow - dow - 7) % 7);
+		if (dow === fdow && smpl.date.lastDayOfMonth(date).getDate() === 28) {
 			// Special case for February. Avoid 2 empty weeks at the end of the month
-			date.subtract('days', 7);
+			smpl.date.shift(date, -7);
 		}
 		var data = [];
 		
+		var defaultDate = this.currentDate ? null : this.adjustDate(this.defaultDate);
+		var selected;
 		for (var i = 0; i < 6; i++) { 
 			var week = [];
 			data.push(week);
 			for (var j = fdow; j < fdow + 7; j++) {
+				if (this.currentDate) selected = smpl.date.diff(date, this.currentDate) === 0;
+				else selected = smpl.date.diff(date, defaultDate) === 0 ? 'default' : false;
 				week.push({
-					dow: date.day(),
-					dom: date.date(),
-					date: date.clone().toDate(),
-					inMonth: date.month() === month,
+					dow: date.getDay(),
+					dom: date.getDate(),
+					date: smpl.date.clone(date),
+					inMonth: date.getMonth() === month,
 					valid: this.isValid(date),
-					isToday: date.diff(this.today, 'days') === 0,
-					selected: date.diff(this.currentDate, 'days') === 0
+					isToday: smpl.date.diff(date, this.today) === 0,
+					selected: selected
 				});
-				date.add('days', 1);
+				smpl.date.shift(date, 1);
 			}
 		}
 		return data;
 	};
 	
 	smpl.ui.Calendar.prototype.isValid = function(date) {
-		if (this.minDate && date.diff(this.minDate, 'days') < 0) return false;
-		else if (this.maxDate && date.diff(this.maxDate, 'days') > 0) return false;
-		else if (this.config.isValid && !this.config.isValid(date.clone().toDate())) return false;
+		if (this.minDate && smpl.date.diff(date, this.minDate) > 0) return false;
+		else if (this.maxDate && smpl.date.diff(date, this.maxDate) < 0) return false;
+		else if (this.config.isValid && !this.config.isValid(smpl.date.clone(date))) return false;
 		return true;
 	};
 	
 	smpl.ui.Calendar.prototype.hasPreviousMonth = function() {
 		if (!this.minDate) return true;
-		return this.currentMonth.diff(this.minDate, 'days') > 0;
+		return smpl.date.diff(this.currentMonth, this.minDate) < 0;
 	};
 	
 	smpl.ui.Calendar.prototype.hasNextMonth = function() {
 		if (!this.maxDate) return true;
-		return this.currentMonth.clone().add('months', this.config.numberOfMonths).diff(this.maxDate, 'days') <= 0;
+		var lastDisplayedMonth = smpl.date.shiftMonth(smpl.date.clone(this.currentMonth), this.config.numberOfMonths);
+		return smpl.date.diff(lastDisplayedMonth, this.maxDate) >= 0;
 	};
 	
 	smpl.ui.Calendar.prototype.nextMonth = function() {
 		if (!this.hasNextMonth()) return false;
-		this.currentMonth.add('months', 1);
+		smpl.date.shiftMonth(this.currentMonth, 1);
 		this.show();
 		return true;
 	};
 	
 	smpl.ui.Calendar.prototype.previousMonth = function() {
 		if (!this.hasPreviousMonth()) return false;
-		this.currentMonth.subtract('months', 1);
+		smpl.date.shiftMonth(this.currentMonth, -1);
 		this.show();
 		return true;
 	};
@@ -111,11 +130,19 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		//the function multiShift operate on currentDate. Save it before
 		var currentDate = this.currentDate;
 		
-		this.currentDate = date;
+		if (this.minDate && smpl.date.diff(date, this.minDate) > 0) {
+			this.currentDate = smpl.date.shift(smpl.date.clone(this.minDate), -1);
+		} else {
+			this.currentDate = date;
+		}
 		var up = this.multiShift(+1, true);
 		var upDate = this.currentDate;
 		
-		this.currentDate = date;
+		if (this.maxDate && smpl.date.diff(date, this.maxDate) < 0) {
+			this.currentDate = smpl.date.shift(smpl.date.clone(this.maxDate), 1);
+		} else {
+			this.currentDate = date;
+		}
 		var down = this.multiShift(-1, true);
 		var downDate = this.currentDate;
 		
@@ -137,11 +164,13 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	};
 	
 	smpl.ui.Calendar.prototype.sameMonth = function(date1, date2) {
-		return date1.month() === date2.month() && date1.year() === date2.year();
+		return date1.getMonth() === date2.getMonth() && date1.getFullYear() === date2.getFullYear();
 	};
 	
 	smpl.ui.Calendar.prototype.shiftMonth = function(direction) {
-		var candidate = this.currentDate.clone().add('months', direction);
+		var candidate = this.getCurrentDate();
+		if (!candidate) return;
+		candidate = smpl.date.shiftMonth(smpl.date.clone(candidate), direction);
 		candidate = this.adjustDate(candidate, true);
 		if (candidate) {
 			this.currentDate = candidate;
@@ -151,17 +180,19 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	};
 	
 	smpl.ui.Calendar.prototype.multiShift = function(diff, noDisplay) {
+		var candidate = this.getCurrentDate();
+		if (!candidate) return null;
 		var shift = 0;
-		var candidate = this.currentDate.clone().add('days', diff);
+		candidate = smpl.date.shift(smpl.date.clone(candidate), diff);
 		
 		var limitDate = diff > 0 ? this.maxDate : this.minDate;
-		var maxShift = limitDate ? Math.floor(limitDate.diff(candidate, 'days') / diff) : Infinity;
+		var maxShift = limitDate ? Math.floor(smpl.date.diff(candidate, limitDate) / diff) : Infinity;
 		
 		while (!this.isValid(candidate) && maxShift-- > 0) {
-			candidate.add('days', diff);
+			smpl.date.shift(candidate, diff);
 		}
 		if (this.isValid(candidate)) {
-			shift = candidate.diff(this.currentDate, 'days') / diff;
+			shift = smpl.date.diff(this.currentDate, candidate) / diff;
 			this.currentDate = candidate;
 			if (!noDisplay) {
 				this.adjustCurrentMonth();
@@ -172,37 +203,43 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 	};
 	
 	/**
-	 * Adjusth `this.currentMonth` based on curentDate.
+	 * Adjust `this.currentMonth` based on curentDate.
 	 */
 	smpl.ui.Calendar.prototype.adjustCurrentMonth = function() {
 		if (!this.currentMonth) return;
-		var selectedMonth = this.currentDate.year() * 12 + this.currentDate.month();
-		var minDisplayedMonth = this.currentMonth.year() * 12 + this.currentMonth.month();
+		if (!this.currentDate) {
+			delete this.currentMonth;
+			return;
+		}
+		var selectedMonth = this.currentDate.getFullYear() * 12 + this.currentDate.getMonth();
+		var minDisplayedMonth = this.currentMonth.getFullYear() * 12 + this.currentMonth.getMonth();
 		var maxDisplayedMonth = minDisplayedMonth + this.config.numberOfMonths - 1;
 		
 		if (selectedMonth < minDisplayedMonth) {
-			this.currentMonth.subtract('months', minDisplayedMonth - selectedMonth);
+			smpl.date.shiftMonth(this.currentMonth, selectedMonth - minDisplayedMonth);
 		} else if (selectedMonth  > maxDisplayedMonth) {
-			this.currentMonth.add('months', selectedMonth - maxDisplayedMonth);
+			smpl.date.shiftMonth(this.currentMonth, selectedMonth - maxDisplayedMonth);
 		}
 	};
 	
 	smpl.ui.Calendar.prototype.findCurrentMonth = function() {
+		var currentDate = this.getCurrentDate() || this.today;
 		// By default, currentMonth is the first day of the month of currentDate
-		this.currentMonth = this.currentDate.clone().startOf('month').add('hours', 12);
+		this.currentMonth = smpl.date.clone(currentDate);
+		this.currentMonth.setDate(1);
 		
-		// when multiple month are displayed, the nexts months may be entierly after maxDate.
+		// when multiple month are displayed, the next months may be entirely after maxDate.
 		// shift currentMonth in the past if possible to maximise the number of valid dates displayed.
 		if (this.maxDate && this.config.numberOfMonths > 1) {
-			var minDisplayedMonth = this.currentMonth.year() * 12 + this.currentMonth.month();
+			var minDisplayedMonth = this.currentMonth.getFullYear() * 12 + this.currentMonth.getMonth();
 			var maxDisplayedMonth = minDisplayedMonth + this.config.numberOfMonths - 1;
 			
-			var maxDateMonth = this.maxDate.year() * 12 + this.maxDate.month();
-			var minDateMonth = this.minDate ? this.minDate.year() * 12 + this.minDate.month() : -Infinity;
+			var maxDateMonth = this.maxDate.getFullYear() * 12 + this.maxDate.getMonth();
+			var minDateMonth = this.minDate ? this.minDate.getFullYear() * 12 + this.minDate.getMonth() : -Infinity;
 			
 			if (maxDisplayedMonth > maxDateMonth) {
 				var shift = Math.min(maxDisplayedMonth - maxDateMonth, minDisplayedMonth - minDateMonth);
-				this.currentMonth.subtract('months', shift);
+				smpl.date.shiftMonth(this.currentMonth, shift);
 			}
 		}
 	};
@@ -216,10 +253,10 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 			hasPreviousMonth: this.hasPreviousMonth(),
 			hasNextMonth: this.hasNextMonth()
 		};
-		var month = this.currentMonth.clone();
+		var month = smpl.date.clone(this.currentMonth);
 		for (var i = 0; i < this.config.numberOfMonths; i++) {
 			data.months.push(this.getMonth(month));
-			month.add('months', 1);
+			smpl.date.shiftMonth(month, 1);
 		}
 		return data;
 	};
@@ -233,7 +270,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		if (this.isValid(date)) {
 			this.currentDate = date;
 			this.adjustCurrentMonth();
-			this.config.onSelect(this.getCurrentDate());
+			this.config.onSelect(this.getSelectedDate());
 			return true;
 		}
 		return false;
@@ -250,7 +287,7 @@ define(['./smpl.ui.core', 'smpl/smpl.number', 'smpl/smpl.data', 'smpl/smpl.dom',
 		
 		if (limit) {
 			var oldDate = this.currentDate;
-			this.currentDate = limit.clone();
+			this.currentDate = smpl.date.clone(limit);
 			if (this.isValid(this.currentDate)) {
 				this.adjustCurrentMonth();
 				this.show();

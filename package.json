@@ -9,15 +9,15 @@
 		"url": "https://github.com/vmeurisse/smpl-ui/issues"
 	},
 	"dependencies": {
-		"smpl": "0.0.1",
+		"smpl": "0.2.0-alpha1",
 		"jake": "0.5.x",
 		"shelljs": "0.1.x",
 		"moment": "2.0.x",
 		"resolve": "0.2.x",
-		"requirejs": "https://github.com/vmeurisse/r.js/archive/master.tar.gz"
+		"requirejs": "2.1.x"
 	},
 	"devDependencies": {
-		"smpl-build-test": "~0.0.2"
+		"smpl-build-test": "~0.3.1"
 	},
 	"scripts": {
 		"install": "jake"

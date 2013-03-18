@@ -1,0 +1,59 @@
+.smpl-ui-calendar {
+	white-space: nowrap;
+}
+
+.smpl-ui-calendar table {
+	border-spacing: 0;
+	vertical-align: middle;
+	text-align: center;
+	font-size: 11px;
+	float: left;
+	border: 1px solid #C13A02;
+	overflow: hidden;
+	border-top-right-radius: 5px;
+	border-top-left-radius: 5px;
+	margin: 5px;
+}
+
+.smpl-ui-calendar .header th {
+	color: #FFF;
+	background-color: #C13A02;
+	font-size: 12px;
+	padding: 6px 0;
+}
+
+.smpl-ui-calendar .header .nextMonth,
+.smpl-ui-calendar .header .previousMonth {
+	background-color: blue;
+}
+
+.smpl-ui-calendar .weekDays th {
+	font-size: 11px;
+	padding: 8px 0;
+}
+
+.smpl-ui-calendar .day {
+	width: 13px;
+	height: 10px;
+	padding: 4px;
+	border: solid 1px white;
+}
+.smpl-ui-calendar .invalid {
+	text-decoration: line-through;
+	background-color: #E7E7E7;
+	color: #999;
+}
+.smpl-ui-calendar .valid {
+	background-color: #9ED1FF;
+	cursor: pointer;
+}
+.smpl-ui-calendar .selected,
+.smpl-ui-calendar .valid:hover {
+	background-color: #C13A02;
+	color: white;
+}
+
+.smpl-ui-calendar .otherMonth {
+	visibility: hidden;
+}
+

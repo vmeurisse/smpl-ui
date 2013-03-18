@@ -1,5 +1,5 @@
 <div class="smpl-ui-calendar" onclick="{$me}.selectDate(event);">
-	<!-- BEGIN: month -->
+	<!-- block: month -->
 		<table >
 			<tr class="header">
 				<th class="{$pmClass}" data-date="{$pmDate}"></th>
@@ -7,17 +7,17 @@
 				<th class="{$nmClass}" data-date="{$nmDate}"></th>
 			</tr>
 			<tr class="weekDays">
-				<!-- BEGIN: wd -->
+				<!-- block: wd -->
 					<th>{$wd}</th>
-				<!-- END: wd -->
+				<!-- /block: wd -->
 			</tr>
-			<!-- BEGIN: week -->
+			<!-- block: week -->
 				<tr>
-					<!-- BEGIN: day -->
+					<!-- block: day -->
 						<td class="{$classes}" data-date="{$date}">{$day}</td>
-					<!-- END: day -->
+					<!-- /block: day -->
 				</tr>
-			<!-- END: week -->
+			<!-- /block: week -->
 		</table>
-	<!-- END: month -->
+	<!-- /block: month -->
 </div>

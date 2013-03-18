@@ -1,6 +1,6 @@
 var fs = require('fs');
 var resolve = require('resolve');
-
+var smplBuild = require('smpl-build-test');
 var dir = {
 	base: __dirname + '/'
 };
@@ -23,23 +23,18 @@ task('default', ['compile', 'compile-templates'], function() {
 task('compile', ['require-js'], function() {
 	console.log('compile-js');
 	var requirejs = require('requirejs');
-
+	
 	var config = {
 		baseUrl: dir.base,
 		name: 'smpl-full',
 		out: dir.base + 'smpl.js',
-		optimize: 'none',
-		uglify: {
-			unsafe: true
-		},
+		//generateSourceMaps: true,
+		optimize: 'none'
+		//useSourceUrl: true,
 		preserveLicenseComments: false,
-		resolve: function(file, src) {
-			console.log(arguments);
-			src = src.substr(0, src.lastIndexOf('/'));
-			return resolve.sync(file, {basedir: src});
-		}
+		packages: [smplBuild.requireConfig('smpl', dir.base, require)]
 	};
-
+	
 	console.log('Building', config.out);
 	requirejs.optimize(config);
 });
@@ -57,7 +52,7 @@ task('compile-templates', [], function() {
 	list.include(dir.base + '/src/**/*.html');
 	list = list.toArray();
 	
-	var smpl = require('smpl/smpl.tpl');
+	var smpl = require('smpl');
 	for (var i = 0, l = list.length; i < l; i++) {
 		var path = list[i];
 		var txt = fs.readFileSync(path, 'utf8');
