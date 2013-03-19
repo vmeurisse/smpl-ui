@@ -29,7 +29,7 @@ task('compile', ['require-js'], function() {
 		name: 'smpl-full',
 		out: dir.base + 'smpl.js',
 		//generateSourceMaps: true,
-		optimize: 'none'
+		optimize: 'none',
 		//useSourceUrl: true,
 		preserveLicenseComments: false,
 		packages: [smplBuild.requireConfig('smpl', dir.base, require)]
